@@ -17,11 +17,9 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter & Noto Sans JP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script>
@@ -55,39 +53,19 @@
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
         }
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0F1115;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2B303C;
-            border-radius: 4px;
-        }
-        .tab-content {
-            animation: fadeIn 0.16s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(3px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translate(-50%, 16px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
-        }
-        .toast-enter {
-            animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #0F1115; }
+        ::-webkit-scrollbar-thumb { background: #2B303C; border-radius: 4px; }
+        .tab-content { animation: fadeIn 0.16s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        .toast-enter { animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
 <body class="flex justify-center min-h-screen">
 
-    <!-- スマホアプリ風メインコンテナ -->
     <div class="w-full max-w-[480px] bg-band-bg min-h-screen flex flex-col relative shadow-2xl border-x border-band-border/60">
         
-        <!-- ヘッダー -->
         <header class="sticky top-0 z-30 bg-band-bg/95 backdrop-blur-md border-b border-band-border px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-2.5 min-w-0">
                 <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-black font-black shadow-lg shadow-amber-500/20 shrink-0">
@@ -102,37 +80,34 @@
                 </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
-                <button onclick="openSettingsModal('pwa')" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-bold text-amber-400 flex items-center gap-1 transition" title="ホーム画面に追加">
+                <button type="button" id="btn-settings-pwa" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-bold text-amber-400 flex items-center gap-1 transition" title="ホーム画面に追加">
                     <i class="fa-solid fa-mobile-screen-button"></i>
                     <span>アプリ化</span>
                 </button>
-                <button onclick="openSettingsModal('line')" class="p-2 text-gray-300 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition relative" title="LINE通知設定・設定">
+                <button type="button" id="btn-settings-line" class="p-2 text-gray-300 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition relative" title="LINE通知設定・設定">
                     <i class="fa-solid fa-gear text-sm"></i>
                     <span id="webhook-active-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-band-line border-2 border-band-bg"></span>
                 </button>
             </div>
         </header>
 
-        <!-- メインコンテンツ領域 -->
         <main id="app-content" class="flex-1 p-4 pb-24 overflow-y-auto space-y-5">
-            <!-- 初期ローディング表示 -->
             <div class="flex flex-col items-center justify-center py-20 text-center space-y-3">
                 <div class="w-10 h-10 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></div>
                 <p class="text-xs font-bold text-gray-400">バンドの最新データを同期しています...</p>
             </div>
         </main>
 
-        <!-- 下部固定ナビゲーションバー（3画面） -->
         <nav class="fixed bottom-0 w-full max-w-[480px] bg-band-card/95 backdrop-blur-md border-t border-band-border z-30 px-2 py-1.5 flex justify-around items-center">
-            <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-amber-400">
+            <button type="button" id="nav-home" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-amber-400">
                 <i class="fa-solid fa-house-chimney text-lg"></i>
                 <span class="text-[10px] font-bold">トップ</span>
             </button>
-            <button onclick="switchTab('schedule')" id="nav-schedule" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-gray-400 hover:text-gray-200">
+            <button type="button" id="nav-schedule" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-gray-400 hover:text-gray-200">
                 <i class="fa-regular fa-calendar-days text-lg"></i>
                 <span class="text-[10px] font-bold">日程集め</span>
             </button>
-            <button onclick="switchTab('menu')" id="nav-menu" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-gray-400 hover:text-gray-200">
+            <button type="button" id="nav-menu" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-gray-400 hover:text-gray-200">
                 <div class="relative">
                     <i class="fa-solid fa-list-check text-lg"></i>
                     <span id="nav-badge-menu" class="hidden absolute -top-1 -right-2 w-2 h-2 bg-emerald-400 rounded-full"></span>
@@ -141,19 +116,15 @@
             </button>
         </nav>
 
-        <!-- 汎用モーダルコンテナ -->
         <div id="modal-backdrop" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40 flex items-end sm:items-center justify-center p-0 sm:p-4">
             <div id="modal-box" class="w-full max-w-[480px] bg-band-card border-t sm:border border-band-border rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl max-h-[92vh] overflow-y-auto">
-                <!-- モーダルの中身 -->
             </div>
         </div>
 
-        <!-- トースト通知コンテナ -->
         <div id="toast-container" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-[440px] px-4 flex flex-col items-center pointer-events-none"></div>
 
     </div>
 
-    <!-- Firebase SDK & アプリケーションロジック -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -177,7 +148,6 @@
         ];
 
         const FIXED_STUDIOS = ['マグナム', 'カディス', 'パワスレ', 'ミックス', 'シーラカンス', '帯広'];
-        const TIME_PRESETS = ['18:00〜21:00', '19:00〜22:00', '20:00〜23:00', '13:00〜16:00', '15:00〜18:00', '終日OK'];
         const LOCAL_PREF_KEY = 'band_sync_user_pref_v1';
 
         function toDateKey(dateObj) {
@@ -372,19 +342,6 @@
             window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
         }
 
-        async function triggerAutoLineWebhook(text) {
-            const url = (appState.webhookUrl || '').trim();
-            if (!url) return;
-            try {
-                await fetch(url, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text, bandName: appState.bandName, timestamp: new Date().toISOString() })
-                });
-            } catch (e) { console.error(e); }
-        }
-
         function buildSessionLineMessage(s) {
             const names = s.participants.map(pid => FIXED_MEMBERS.find(m => m.id === pid)?.name).filter(Boolean).join('、');
             const menus = (s.menus || []).length > 0 ? '\n【メニュー】\n' + s.menus.map(m => `・${m.time} ${m.task}`).join('\n') : '';
@@ -400,7 +357,7 @@
             let btnHtml = '';
             if (lineMsg) {
                 const id = 'line_btn_' + Date.now();
-                btnHtml = `<button id="${id}" class="px-3 py-1.5 rounded-xl bg-band-line text-white text-[11px] font-black flex items-center gap-1"><i class="fa-brands fa-line"></i>LINE</button>`;
+                btnHtml = `<button type="button" id="${id}" class="px-3 py-1.5 rounded-xl bg-band-line text-white text-[11px] font-black flex items-center gap-1"><i class="fa-brands fa-line"></i>LINE</button>`;
                 setTimeout(() => { const b = document.getElementById(id); if(b) b.onclick = () => openLineShareIntent(lineMsg); }, 0);
             }
 
@@ -456,14 +413,14 @@
                                     <i class="fa-solid fa-location-dot"></i> ${escapeHtml(s.studio)}
                                 </span>
                                 <div class="flex items-center gap-1.5">
-                                    <button onclick="openLineShareIntent(buildSessionLineMessage(appState.confirmedSessions['${s.date}']))" class="px-2.5 py-1 rounded-lg bg-band-line text-white text-[11px] font-black"><i class="fa-brands fa-line"></i> LINE共有</button>
-                                    <button onclick="jumpToCalendarDate('${s.date}')" class="px-2 py-1 bg-white/5 text-gray-300 text-[11px] font-bold rounded-lg">編集</button>
-                                    <button onclick="cancelConfirmedSession('${s.date}')" class="text-gray-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                                    <button type="button" data-action="line-share" data-date="${s.date}" class="px-2.5 py-1 rounded-lg bg-band-line text-white text-[11px] font-black"><i class="fa-brands fa-line"></i> LINE共有</button>
+                                    <button type="button" data-action="jump-cal" data-date="${s.date}" class="px-2 py-1 bg-white/5 text-gray-300 text-[11px] font-bold rounded-lg">編集</button>
+                                    <button type="button" data-action="cancel-conf" data-date="${s.date}" class="text-gray-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash-can"></i></button>
                                 </div>
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-1.5">${members}</div>
-                        <div onclick="selectedMenuDate='${s.date}';switchTab('menu')" class="bg-black/40 rounded-xl p-3 cursor-pointer border border-white/5">
+                        <div data-action="go-menu" data-date="${s.date}" class="bg-black/40 rounded-xl p-3 cursor-pointer border border-white/5">
                             <div class="text-[10px] font-bold text-emerald-400 mb-1">練習メニュー (${s.menus?.length || 0}件)</div>
                             ${menus || '<span class="text-[11px] text-gray-500">メニュー未登録（タップして追加）</span>'}
                         </div>
@@ -476,15 +433,15 @@
                     <div>
                         <h3 class="font-bold text-base text-white">${escapeHtml(t.title)}</h3>
                         <div class="flex gap-2 mt-1.5 text-[11px]">
-                            <button onclick="cycleTrackStatus('${t.id}')" class="px-2.5 py-0.5 rounded-full border bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold">${escapeHtml(t.status)}</button>
+                            <button type="button" data-action="cycle-track" data-id="${t.id}" class="px-2.5 py-0.5 rounded-full border bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold">${escapeHtml(t.status)}</button>
                             <span class="bg-black/40 px-2 py-0.5 rounded text-gray-300">BPM <strong class="text-amber-400">${t.bpm||'-'}</strong></span>
                             <span class="bg-black/40 px-2 py-0.5 rounded text-gray-300">Key <strong class="text-emerald-400">${t.key||'-'}</strong></span>
                         </div>
                         ${t.memo ? `<div class="mt-2 text-xs text-gray-300 bg-black/30 p-2 rounded-xl border-l-2 border-amber-500">${escapeHtml(t.memo)}</div>`:''}
                     </div>
                     <div class="flex gap-1">
-                        <button onclick="openTrackModal('${t.id}')" class="p-2 text-gray-400 hover:text-amber-400"><i class="fa-solid fa-pen text-xs"></i></button>
-                        <button onclick="deleteTrack('${t.id}')" class="p-2 text-gray-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        <button type="button" data-action="edit-track" data-id="${t.id}" class="p-2 text-gray-400 hover:text-amber-400"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button type="button" data-action="del-track" data-id="${t.id}" class="p-2 text-gray-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -494,14 +451,14 @@
                     <section class="space-y-3">
                         <div class="flex justify-between items-center">
                             <h2 class="text-sm font-black text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-emerald-400 rounded-full"></span>確定済みスタジオ予定</h2>
-                            <button onclick="switchTab('schedule')" class="px-2.5 py-1.5 bg-white/5 text-emerald-400 font-bold text-[11px] rounded-xl"><i class="fa-regular fa-calendar-plus"></i> 日程追加</button>
+                            <button type="button" id="btn-goto-schedule" class="px-2.5 py-1.5 bg-white/5 text-emerald-400 font-bold text-[11px] rounded-xl"><i class="fa-regular fa-calendar-plus"></i> 日程追加</button>
                         </div>
                         ${confirmedHtml}
                     </section>
                     <section class="space-y-3">
                         <div class="flex justify-between items-center">
                             <h2 class="text-sm font-black text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-amber-500 rounded-full"></span>現在着手中の曲</h2>
-                            <button onclick="openTrackModal()" class="px-3 py-2 bg-amber-500 text-black font-black text-xs rounded-xl shadow"><i class="fa-solid fa-plus"></i> 曲を追加</button>
+                            <button type="button" id="btn-add-track" class="px-3 py-2 bg-amber-500 text-black font-black text-xs rounded-xl shadow"><i class="fa-solid fa-plus"></i> 曲を追加</button>
                         </div>
                         <div class="space-y-3">${tracksHtml}</div>
                     </section>
@@ -514,13 +471,13 @@
             const curMonth = months[activeCalendarMonthIndex] || months[0];
 
             const memberPills = FIXED_MEMBERS.map(m => `
-                <button onclick="selectActiveMember('${m.id}')" class="px-3 py-2 rounded-xl text-xs font-black border transition ${m.id === activeMemberId ? 'bg-amber-500 text-black border-amber-400 shadow' : 'bg-band-card text-gray-300 border-band-border'}">
+                <button type="button" data-action="select-member" data-id="${m.id}" class="px-3 py-2 rounded-xl text-xs font-black border transition ${m.id === activeMemberId ? 'bg-amber-500 text-black border-amber-400 shadow' : 'bg-band-card text-gray-300 border-band-border'}">
                     ${m.name}
                 </button>
             `).join('');
 
             const monthTabs = months.map((m, idx) => `
-                <button onclick="activeCalendarMonthIndex=${idx};renderApp()" class="flex-1 py-2 text-xs font-black rounded-lg ${idx === activeCalendarMonthIndex ? 'bg-emerald-500 text-black' : 'text-gray-400'}">${m.label}</button>
+                <button type="button" data-action="switch-month" data-idx="${idx}" class="flex-1 py-2 text-xs font-black rounded-lg ${idx === activeCalendarMonthIndex ? 'bg-emerald-500 text-black' : 'text-gray-400'}">${m.label}</button>
             `).join('');
 
             const firstDay = new Date(curMonth.year, curMonth.month - 1, 1).getDay();
@@ -552,7 +509,7 @@
                 const myDot = mySt === 'ok' ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>' : mySt === 'maybe' ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>' : mySt === 'ng' ? '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>' : '';
 
                 cells += `
-                    <button onclick="selectedCalendarDate='${dk}';renderApp()" class="h-14 rounded-xl border p-1 flex flex-col justify-between items-center transition ${style}">
+                    <button type="button" data-action="select-date" data-date="${dk}" class="h-14 rounded-xl border p-1 flex flex-col justify-between items-center transition ${style}">
                         <div class="w-full flex justify-between px-0.5"><span class="text-xs font-black ${isToday?'text-amber-400 underline':'text-gray-200'}">${d}</span>${myDot}</div>
                         ${confirmed ? `<span class="w-full text-center text-[9px] font-black bg-cyan-400 text-black rounded truncate">${escapeHtml(confirmed.studio)}</span>` : (ok>0||maybe>0)?`<div class="text-[9px] font-extrabold">${ok>0?`<span>◯${ok}</span>`:''}${maybe>0?`<span class="text-amber-400">△${maybe}</span>`:''}</div>`:'<span class="h-2"></span>'}
                     </button>
@@ -601,13 +558,13 @@
                         <div class="bg-black/30 rounded-xl p-3 border border-amber-500/20 space-y-2">
                             <div class="text-xs font-black text-amber-400">「${activeMember.name}」の都合を入力</div>
                             <div class="grid grid-cols-3 gap-2">
-                                <button onclick="setMyAvailability('${dk}','ok')" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='ok'?'bg-emerald-500 text-black border-emerald-400':'bg-band-card text-gray-400'}">◯ 参加OK</button>
-                                <button onclick="setMyAvailability('${dk}','maybe')" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='maybe'?'bg-amber-500 text-black border-amber-400':'bg-band-card text-gray-400'}">△ 微妙</button>
-                                <button onclick="setMyAvailability('${dk}','ng')" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='ng'?'bg-rose-500 text-white border-rose-400':'bg-band-card text-gray-400'}">× 不可</button>
+                                <button type="button" data-action="set-avail" data-status="ok" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='ok'?'bg-emerald-500 text-black border-emerald-400':'bg-band-card text-gray-400'}">◯ 参加OK</button>
+                                <button type="button" data-action="set-avail" data-status="maybe" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='maybe'?'bg-amber-500 text-black border-amber-400':'bg-band-card text-gray-400'}">△ 微妙</button>
+                                <button type="button" data-action="set-avail" data-status="ng" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='ng'?'bg-rose-500 text-white border-rose-400':'bg-band-card text-gray-400'}">× 不可</button>
                             </div>
                             <div class="flex gap-1.5 pt-1">
                                 <input type="text" id="my-timeslot" value="${escapeHtml(myAvail.timeSlot||'19:00〜22:00')}" class="flex-1 bg-band-bg border border-band-border rounded-xl px-3 py-2 text-xs text-white">
-                                <button onclick="saveMyTime('${dk}')" class="px-3 bg-amber-500 text-black font-black text-xs rounded-xl">保存</button>
+                                <button type="button" id="btn-save-time" class="px-3 bg-amber-500 text-black font-black text-xs rounded-xl">保存</button>
                             </div>
                         </div>
                         <div>
@@ -616,11 +573,9 @@
                         </div>
                         <div class="bg-gradient-to-br from-[#162422] to-[#121820] rounded-xl p-3.5 border border-emerald-500/40 space-y-3">
                             <div class="text-xs font-black text-emerald-400">この日でスタジオを確定する</div>
-                            <div class="grid grid-cols-3 gap-1.5">
-                                ${studioRadios}
-                            </div>
+                            <div class="grid grid-cols-3 gap-1.5">${studioRadios}</div>
                             <input type="text" id="conf-timeslot" value="${confirmed?.timeSlot||'19:00〜22:00'}" class="w-full bg-black/60 border border-band-border rounded-xl px-3 py-2 text-xs text-white font-bold">
-                            <button onclick="confirmStudio('${dk}')" class="w-full py-2.5 rounded-xl bg-emerald-500 text-black font-black text-xs shadow">確定してトップに反映</button>
+                            <button type="button" id="btn-confirm-studio" class="w-full py-2.5 rounded-xl bg-emerald-500 text-black font-black text-xs shadow">確定してトップに反映</button>
                         </div>
                     </div>
                 </div>
@@ -638,7 +593,7 @@
             const progress = menus.length > 0 ? Math.round((doneCount / menus.length) * 100) : 0;
 
             const sessionPills = confirmedList.map(s => `
-                <button onclick="selectedMenuDate='${s.date}';renderApp()" class="px-3 py-2 rounded-xl border text-left shrink-0 ${s.date===session.date?'bg-emerald-500/20 border-emerald-400 text-white':'bg-band-card border-band-border text-gray-400'}">
+                <button type="button" data-action="select-menu-date" data-date="${s.date}" class="px-3 py-2 rounded-xl border text-left shrink-0 ${s.date===session.date?'bg-emerald-500/20 border-emerald-400 text-white':'bg-band-card border-band-border text-gray-400'}">
                     <div class="text-xs font-black">${formatDateShort(s.date)}(${getDayOfWeekJP(s.date)})</div>
                     <div class="text-[10px] text-amber-300 font-bold">${s.studio}</div>
                 </button>
@@ -646,13 +601,13 @@
 
             const menuItems = menus.map((m, idx) => `
                 <div class="bg-band-card border ${m.done?'border-band-border/40 opacity-60':'border-band-border'} rounded-2xl p-3.5 flex items-start gap-3">
-                    <button onclick="toggleMenu('${session.date}','${m.id}')" class="mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 ${m.done?'bg-emerald-500 border-emerald-500 text-black':'border-gray-500 text-transparent'}"><i class="fa-solid fa-check text-xs"></i></button>
+                    <button type="button" data-action="toggle-menu" data-id="${m.id}" class="mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 ${m.done?'bg-emerald-500 border-emerald-500 text-black':'border-gray-500 text-transparent'}"><i class="fa-solid fa-check text-xs"></i></button>
                     <div class="flex-1 min-w-0">
                         <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-black/50 text-emerald-300">${escapeHtml(m.time)}</span>
                         <h4 class="text-sm font-bold ${m.done?'line-through text-gray-400':'text-white'} mt-1">${escapeHtml(m.task)}</h4>
                         ${m.note?`<p class="text-xs text-gray-400 mt-0.5">${escapeHtml(m.note)}</p>`:''}
                     </div>
-                    <button onclick="deleteMenu('${session.date}','${m.id}')" class="text-gray-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    <button type="button" data-action="del-menu" data-id="${m.id}" class="text-gray-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                 </div>
             `).join('');
 
@@ -665,7 +620,7 @@
                                 <div class="text-base font-black text-white">${formatDateShort(session.date)} @${session.studio}</div>
                                 <div class="text-xs font-bold text-emerald-300">${session.timeSlot}</div>
                             </div>
-                            <button onclick="openMenuModal('${session.date}')" class="px-3 py-2 bg-emerald-500 text-black font-black text-xs rounded-xl shadow"><i class="fa-solid fa-plus"></i> 追加</button>
+                            <button type="button" id="btn-add-menu" class="px-3 py-2 bg-emerald-500 text-black font-black text-xs rounded-xl shadow"><i class="fa-solid fa-plus"></i> 追加</button>
                         </div>
                         <div>
                             <div class="flex justify-between text-[11px] mb-1 text-gray-400"><span>消化率</span><span class="text-emerald-400 font-bold">${doneCount}/${menus.length} (${progress}%)</span></div>
@@ -699,10 +654,6 @@
             renderApp();
             await saveCloudData();
             showToast('予定を保存しました');
-        }
-
-        async function saveMyTime(dk) {
-            setMyAvailability(dk, appState.availability[dk]?.[activeMemberId]?.status || 'ok');
         }
 
         async function confirmStudio(dk) {
@@ -742,9 +693,6 @@
             if (s) { s.menus = s.menus.filter(x => x.id !== mid); renderApp(); await saveCloudData(); }
         }
 
-        function jumpToCalendarDate(dk) { selectedCalendarDate = dk; switchTab('schedule'); }
-        function selectActiveMember(id) { activeMemberId = id; savePreferredMember(id); renderApp(); }
-
         function openModal(html) {
             document.getElementById('modal-box').innerHTML = html;
             document.getElementById('modal-backdrop').classList.remove('hidden');
@@ -754,8 +702,8 @@
         function openTrackModal(id = null) {
             const t = id ? appState.tracks.find(x => x.id === id) : null;
             openModal(`
-                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">${t?'編集':'追加'}</h3><button onclick="closeModal()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
-                <form onsubmit="saveTrack(event,'${id||''}')" class="space-y-3">
+                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">${t?'編集':'追加'}</h3><button type="button" id="btn-close-modal" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                <form id="track-form" class="space-y-3">
                     <input type="text" id="t-title" required value="${t?escapeHtml(t.title):''}" placeholder="曲名" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
                     <div class="grid grid-cols-2 gap-2">
                         <input type="number" id="t-bpm" value="${t?t.bpm:''}" placeholder="BPM" class="bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
@@ -765,82 +713,123 @@
                     <button type="submit" class="w-full py-2.5 bg-amber-500 text-black font-black text-xs rounded-xl">保存</button>
                 </form>
             `);
-        }
-
-        async function saveTrack(e, id) {
-            e.preventDefault();
-            const title = document.getElementById('t-title').value;
-            const bpm = document.getElementById('t-bpm').value;
-            const key = document.getElementById('t-key').value;
-            const memo = document.getElementById('t-memo').value;
-            if (id) {
-                const t = appState.tracks.find(x => x.id === id);
-                if (t) { t.title = title; t.bpm = bpm; t.key = key; t.memo = memo; }
-            } else {
-                appState.tracks.unshift({ id: 't_'+Date.now(), title, bpm, key, status: '合わせ練習中', memo });
-            }
-            closeModal(); renderApp(); await saveCloudData();
+            document.getElementById('btn-close-modal').onclick = closeModal;
+            document.getElementById('track-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const title = document.getElementById('t-title').value;
+                const bpm = document.getElementById('t-bpm').value;
+                const key = document.getElementById('t-key').value;
+                const memo = document.getElementById('t-memo').value;
+                if (id) {
+                    const tr = appState.tracks.find(x => x.id === id);
+                    if (tr) { tr.title = title; tr.bpm = bpm; tr.key = key; tr.memo = memo; }
+                } else {
+                    appState.tracks.unshift({ id: 't_'+Date.now(), title, bpm, key, status: '合わせ練習中', memo });
+                }
+                closeModal(); renderApp(); await saveCloudData();
+            };
         }
 
         function openMenuModal(dk) {
             openModal(`
-                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">メニュー追加</h3><button onclick="closeModal()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
-                <form onsubmit="saveMenu(event,'${dk}')" class="space-y-3">
+                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">メニュー追加</h3><button type="button" id="btn-close-modal" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                <form id="menu-form" class="space-y-3">
                     <input type="text" id="m-time" value="19:00〜19:30" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
                     <input type="text" id="m-task" required placeholder="練習内容" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
                     <textarea id="m-note" placeholder="メモ" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white"></textarea>
                     <button type="submit" class="w-full py-2.5 bg-emerald-500 text-black font-black text-xs rounded-xl">保存</button>
                 </form>
             `);
-        }
-
-        async function saveMenu(e, dk) {
-            e.preventDefault();
-            const s = appState.confirmedSessions[dk];
-            if (!s) return;
-            s.menus.push({ id: 'm_'+Date.now(), time: document.getElementById('m-time').value, task: document.getElementById('m-task').value, note: document.getElementById('m-note').value, done: false });
-            closeModal(); renderApp(); await saveCloudData();
+            document.getElementById('btn-close-modal').onclick = closeModal;
+            document.getElementById('menu-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const s = appState.confirmedSessions[dk];
+                if (!s) return;
+                s.menus.push({ id: 'm_'+Date.now(), time: document.getElementById('m-time').value, task: document.getElementById('m-task').value, note: document.getElementById('m-note').value, done: false });
+                closeModal(); renderApp(); await saveCloudData();
+            };
         }
 
         function openSettingsModal() {
             openModal(`
-                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">アプリ化・設定</h3><button onclick="closeModal()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">アプリ化・設定</h3><button type="button" id="btn-close-modal" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
                 <div class="space-y-3 text-xs text-gray-300">
                     <div class="bg-black/40 p-3 rounded-xl"><strong class="text-white">📱 スマホのホーム画面に追加する方法</strong><br>・iPhone: Safariの共有ボタン ＞「ホーム画面に追加」<br>・Android: Chromeのメニュー ＞「ホーム画面に追加」</div>
-                    <form onsubmit="saveBandName(event)" class="space-y-2"><label class="font-bold">バンド名</label><div class="flex gap-2"><input type="text" id="s-name" value="${escapeHtml(appState.bandName)}" class="flex-1 bg-black/50 border border-band-border rounded-xl px-3 py-2 text-white"><button type="submit" class="px-4 bg-amber-500 text-black font-bold rounded-xl">変更</button></div></form>
+                    <form id="band-form" class="space-y-2"><label class="font-bold">バンド名</label><div class="flex gap-2"><input type="text" id="s-name" value="${escapeHtml(appState.bandName)}" class="flex-1 bg-black/50 border border-band-border rounded-xl px-3 py-2 text-white"><button type="submit" class="px-4 bg-amber-500 text-black font-bold rounded-xl">変更</button></div></form>
                 </div>
             `);
+            document.getElementById('btn-close-modal').onclick = closeModal;
+            document.getElementById('band-form').onsubmit = async (e) => {
+                e.preventDefault();
+                appState.bandName = document.getElementById('s-name').value;
+                renderApp(); closeModal(); await saveCloudData();
+            };
         }
 
-        async function saveBandName(e) {
-            e.preventDefault();
-            appState.bandName = document.getElementById('s-name').value;
-            renderApp(); closeModal(); await saveCloudData();
-        }
+        // イベント一括リスナー（ボタンの反応しない問題を完全に防ぐ安全設計）
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button, [data-action]');
+            if (!btn) return;
+            
+            // 下部ナビ
+            if (btn.id === 'nav-home') { switchTab('home'); return; }
+            if (btn.id === 'nav-schedule') { switchTab('schedule'); return; }
+            if (btn.id === 'nav-menu') { switchTab('menu'); return; }
 
-        // グローバル公開（HTMLのonclickやイベントから呼び出せるようにする）
-        window.renderApp = renderApp;
-        window.switchTab = switchTab;
-        window.openSettingsModal = openSettingsModal;
-        window.closeModal = closeModal;
-        window.cycleTrackStatus = cycleTrackStatus;
-        window.deleteTrack = deleteTrack;
-        window.openTrackModal = openTrackModal;
-        window.saveTrack = saveTrack;
-        window.jumpToCalendarDate = jumpToCalendarDate;
-        window.selectActiveMember = selectActiveMember;
-        window.setMyAvailability = setMyAvailability;
-        window.saveMyTime = saveMyTime;
-        window.confirmStudio = confirmStudio;
-        window.cancelConfirmedSession = cancelConfirmedSession;
-        window.toggleMenu = toggleMenu;
-        window.deleteMenu = deleteMenu;
-        window.openMenuModal = openMenuModal;
-        window.saveMenu = saveMenu;
-        window.saveBandName = saveBandName;
-        window.openLineShareIntent = openLineShareIntent;
-        window.buildSessionLineMessage = buildSessionLineMessage;
+            // ヘッダー設定ボタン
+            if (btn.id === 'btn-settings-pwa' || btn.id === 'btn-settings-line') { openSettingsModal(); return; }
+
+            // ホーム画面のボタン
+            if (btn.id === 'btn-goto-schedule') { switchTab('schedule'); return; }
+            if (btn.id === 'btn-add-track') { openTrackModal(); return; }
+
+            const action = btn.getAttribute('data-action');
+            const date = btn.getAttribute('data-date');
+            const id = btn.getAttribute('data-id');
+
+            if (action === 'line-share') {
+                openLineShareIntent(buildSessionLineMessage(appState.confirmedSessions[date]));
+            } else if (action === 'jump-cal') {
+                selectedCalendarDate = date; switchTab('schedule');
+            } else if (action === 'cancel-conf') {
+                cancelConfirmedSession(date);
+            } else if (action === 'go-menu') {
+                selectedMenuDate = date; switchTab('menu');
+            } else if (action === 'cycle-track') {
+                cycleTrackStatus(id);
+            } else if (action === 'edit-track') {
+                openTrackModal(id);
+            } else if (action === 'del-track') {
+                deleteTrack(id);
+            } else if (action === 'select-member') {
+                activeMemberId = btn.getAttribute('data-id'); savePreferredMember(activeMemberId); renderApp();
+            } else if (action === 'switch-month') {
+                activeCalendarMonthIndex = parseInt(btn.getAttribute('data-idx'), 10); renderApp();
+            } else if (action === 'select-date') {
+                selectedCalendarDate = date; renderApp();
+            } else if (action === 'set-avail') {
+                setMyAvailability(selectedCalendarDate, btn.getAttribute('data-status'));
+            } else if (action === 'select-menu-date') {
+                selectedMenuDate = date; renderApp();
+            } else if (action === 'toggle-menu') {
+                toggleMenu(selectedMenuDate, id);
+            } else if (action === 'del-menu') {
+                deleteMenu(selectedMenuDate, id);
+            }
+        });
+
+        // 保存系個別ボタン
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'btn-save-time') {
+                setMyAvailability(selectedCalendarDate, appState.availability[selectedCalendarDate]?.[activeMemberId]?.status || 'ok');
+            } else if (e.target.id === 'btn-confirm-studio') {
+                confirmStudio(selectedCalendarDate);
+            } else if (e.target.id === 'btn-add-menu') {
+                openMenuModal(selectedMenuDate);
+            }
+        });
 
         initFirebaseSync();
+    </script>
 </body>
 </html>
