@@ -818,6 +818,8 @@
             renderApp(); closeModal(); await saveCloudData();
         }
 
+        // グローバル公開（HTMLのonclickやイベントから呼び出せるようにする）
+        window.renderApp = renderApp;
         window.switchTab = switchTab;
         window.openSettingsModal = openSettingsModal;
         window.closeModal = closeModal;
@@ -840,6 +842,5 @@
         window.buildSessionLineMessage = buildSessionLineMessage;
 
         initFirebaseSync();
-    </script>
 </body>
 </html>
