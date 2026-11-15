@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BAND SYNC - 5人専用スタジオ日程＆練習管理</title>
+    
+    <!-- PWA / スマホホーム画面アイコン化対応 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BAND SYNC">
+    <meta name="theme-color" content="#0F1115">
+    
+    <!-- SVGカスタムアプリアイコン (Data URI) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23F59E0B'/%3E%3Cstop offset='100%25' stop-color='%23EA580C'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='%230F1115'/%3E%3Crect x='24' y='24' width='464' height='464' rx='96' fill='url(%23g)'/%3E%3Cpath d='M288 96L144 280h112l-32 136 144-184H256l32-136z' fill='%230F1115'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23F59E0B'/%3E%3Cstop offset='100%25' stop-color='%23EA580C'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='url(%23g)'/%3E%3Cpath d='M288 96L144 280h112l-32 136 144-184H256l32-136z' fill='%230F1115'/%3E%3C/svg%3E">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', '"Noto Sans JP"', 'sans-serif'],
+                    },
+                    colors: {
+                        band: {
+                            bg: '#0F1115',
+                            card: '#1A1D24',
+                            cardHover: '#232730',
+                            border: '#2B303C',
+                            amber: '#F59E0B',
+                            emerald: '#10B981',
+                            line: '#06C755',
+                            rose: '#F43F5E'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #08090C;
+            color: #F3F4F6;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F1115;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2B303C;
+            border-radius: 4px;
+        }
+        .tab-content {
+            animation: fadeIn 0.16s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 16px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .toast-enter {
+            animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="flex justify-center min-h-screen">
+
+    <!-- スマホアプリ風メインコンテナ -->
+    <div class="w-full max-w-[480px] bg-band-bg min-h-screen flex flex-col relative shadow-2xl border-x border-band-border/60">
+        
+        <!-- ヘッダー -->
+        <header class="sticky top-0 z-30 bg-band-bg/95 backdrop-blur-md border-b border-band-border px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-black font-black shadow-lg shadow-amber-500/20 shrink-0">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="font-black text-base tracking-wider text-white leading-none truncate" id="header-band-name">BAND SYNC</h1>
+                    <div class="flex items-center gap-1.5 mt-1">
+                        <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span id="sync-status-text" class="text-[10px] text-gray-400 font-bold">クラウド接続中...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <button onclick="openSettingsModal('pwa')" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-bold text-amber-400 flex items-center gap-1 transition" title="ホーム画面に追加">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>アプリ化</span>
+                </button>
+                <button onclick="openSettingsModal('line')" class="p-2 text-gray-300 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition relative" title="LINE通知設定・設定">
+                    <i class="fa-solid fa-gear text-sm"></i>
+                    <span id="webhook-active-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-band-line border-2 border-band-bg"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ領域 -->
+        <main id="app-content" class="flex-1 p-4 pb-24 overflow-y-auto space-y-5">
+            <!-- 初期ローディング表示 -->
+            <div class="flex flex-col items-center justify-center py-20 text-center space-y-3">
+                <div class="w-10 h-10 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></div>
+                <p class="text-xs font-bold text-gray-400">バンドの最新データを同期しています...</p>
+            </div>
+        </main>
+
+        <!-- 下部固定ナビゲーションバー（3画面） -->
+        <nav class="fixed bottom-0 w-full max-w-[480px] bg-band-card/95 backdrop-blur-md border-t border-band-border z-30 px-2 py-1.5 flex justify-around items-center">
+            <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-amber-400">
+                <i class="fa-solid fa-house-chimney text-lg"></i>
+                <span class="text-[10px] font-bold">トップ</span>
+            </button>
+            <button onclick="switchTab('schedule')" id="nav-schedule" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-gray-400 hover:text-gray-200">
+                <i class="fa-regular fa-calendar-days text-lg"></i>
+                <span class="text-[10px] font-bold">日程集め</span>
+            </button>
+            <button onclick="switchTab('menu')" id="nav-menu" class="nav-btn flex-1 py-1.5 flex flex-col items-center gap-1 rounded-xl transition text-gray-400 hover:text-gray-200">
+                <div class="relative">
+                    <i class="fa-solid fa-list-check text-lg"></i>
+                    <span id="nav-badge-menu" class="hidden absolute -top-1 -right-2 w-2 h-2 bg-emerald-400 rounded-full"></span>
+                </div>
+                <span class="text-[10px] font-bold">練習メニュー</span>
+            </button>
+        </nav>
+
+        <!-- 汎用モーダルコンテナ -->
+        <div id="modal-backdrop" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40 flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div id="modal-box" class="w-full max-w-[480px] bg-band-card border-t sm:border border-band-border rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl max-h-[92vh] overflow-y-auto">
+                <!-- モーダルの中身 -->
+            </div>
+        </div>
+
+        <!-- トースト通知コンテナ -->
+        <div id="toast-container" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-[440px] px-4 flex flex-col items-center pointer-events-none"></div>
+
+    </div>
+
+    <!-- Firebase SDK & アプリケーションロジック -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // 1. あなたが取得したFirebase設定
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQnYTdqa59PH_PW1ASCu2zm0SpUp2zcFU",
+            authDomain: "end-a-like-affair-kanri.firebaseapp.com",
+            projectId: "end-a-like-affair-kanri",
+            storageBucket: "end-a-like-affair-kanri.firebasestorage.app",
+            messagingSenderId: "114832541003",
+            appId: "1:114832541003:web:d68c230aac56a075f854ce"
+        };
+
+        const FIXED_MEMBERS = [
+            { id: 'amachan', name: 'あまちゃん', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+            { id: 'masaki',  name: 'まさき',     color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' },
+            { id: 'miyagi',  name: 'みやぎ',     color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
+            { id: 'adachi',  name: 'あだち',     color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
+            { id: 'genta',   name: 'げんた',     color: 'bg-rose-500/20 text-rose-300 border-rose-500/40' }
+        ];
+
+        const FIXED_STUDIOS = ['マグナム', 'カディス', 'パワスレ', 'ミックス', 'シーラカンス', '帯広'];
+        const TIME_PRESETS = ['18:00〜21:00', '19:00〜22:00', '20:00〜23:00', '13:00〜16:00', '15:00〜18:00', '終日OK'];
+        const LOCAL_PREF_KEY = 'band_sync_user_pref_v1';
+
+        function toDateKey(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getDayOfWeekJP(dateStr) {
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return days[new Date(y, m - 1, d).getDay()];
+        }
+
+        function formatDateShort(dateStr) {
+            const [, m, d] = dateStr.split('-').map(Number);
+            return `${m}/${d}`;
+        }
+
+        function formatDateWithDow(dateStr) {
+            return `${formatDateShort(dateStr)}(${getDayOfWeekJP(dateStr)})`;
+        }
+
+        function getTwoMonthsList() {
+            const now = new Date();
+            const m0 = new Date(now.getFullYear(), now.getMonth(), 1);
+            const m1 = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            return [
+                { year: m0.getFullYear(), month: m0.getMonth() + 1, label: `${m0.getFullYear()}年 ${m0.getMonth() + 1}月` },
+                { year: m1.getFullYear(), month: m1.getMonth() + 1, label: `${m1.getFullYear()}年 ${m1.getMonth() + 1}月` }
+            ];
+        }
+
+        function createDefaultData() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = now.getMonth();
+            const d1 = toDateKey(new Date(y, m, Math.min(28, now.getDate() + 3)));
+            const d2 = toDateKey(new Date(y, m, Math.min(28, now.getDate() + 7)));
+
+            return {
+                bandName: 'BAND SYNC',
+                webhookUrl: '',
+                tracks: [
+                    { id: 't1', title: '北風とオーバーレブ', bpm: 172, key: 'Em', status: '合わせ練習中', memo: 'サビ前のキメを5人でバッチリ合わせる。' },
+                    { id: 't2', title: 'ミッドナイト・ハイウェイ', bpm: 136, key: 'C#m', status: 'アレンジ中', memo: 'イントロのリフ調整中。' }
+                ],
+                availability: {
+                    [d1]: {
+                        amachan: { status: 'ok', timeSlot: '19:00〜22:00' },
+                        masaki:  { status: 'ok', timeSlot: '19:00〜22:00' },
+                        miyagi:  { status: 'ok', timeSlot: '19:00〜22:00' },
+                        adachi:  { status: 'ok', timeSlot: '19:30〜22:00' },
+                        genta:   { status: 'ok', timeSlot: '19:00〜22:00' }
+                    }
+                },
+                confirmedSessions: {
+                    [d1]: {
+                        id: 'conf_' + d1,
+                        date: d1,
+                        studio: 'マグナム',
+                        timeSlot: '19:00〜22:00',
+                        participants: ['amachan', 'masaki', 'miyagi', 'adachi', 'genta'],
+                        menus: [
+                            { id: 'm1', time: '19:00〜19:30', task: 'セッティング・中音バランス確認', note: '低音域整理', done: true },
+                            { id: 'm2', time: '19:30〜21:00', task: '「北風とオーバーレブ」徹底合わせ', note: 'ブレイクの確認', done: false }
+                        ]
+                    }
+                }
+            };
+        }
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let sharedDocRef = null;
+
+        let appState = createDefaultData();
+        let currentTab = 'home';
+        let activeMemberId = loadPreferredMember();
+        let activeCalendarMonthIndex = 0;
+        let selectedCalendarDate = toDateKey(new Date());
+        let selectedMenuDate = null;
+        let hasInitializedSelection = false;
+
+        function loadPreferredMember() {
+            try {
+                const saved = localStorage.getItem(LOCAL_PREF_KEY);
+                if (saved && FIXED_MEMBERS.some(m => m.id === saved)) return saved;
+            } catch (e) {}
+            return FIXED_MEMBERS[0].id;
+        }
+
+        function savePreferredMember(memberId) {
+            try { localStorage.setItem(LOCAL_PREF_KEY, memberId); } catch (e) {}
+        }
+
+        async function initFirebaseSync() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                await signInAnonymously(auth);
+
+                onAuthStateChanged(auth, (user) => {
+                    if (!user) return;
+                    currentUser = user;
+                    // バンド専用の共有ドキュメントパス
+                    sharedDocRef = doc(db, 'artifacts', 'band-sync-5members', 'public', 'data', 'band_workspace', 'main_state');
+
+                    onSnapshot(sharedDocRef, async (snapshot) => {
+                        if (snapshot.exists()) {
+                            const data = snapshot.data();
+                            appState = {
+                                bandName: data.bandName || 'BAND SYNC',
+                                webhookUrl: data.webhookUrl || '',
+                                tracks: Array.isArray(data.tracks) ? data.tracks : [],
+                                availability: data.availability || {},
+                                confirmedSessions: data.confirmedSessions || {}
+                            };
+                        } else {
+                            appState = createDefaultData();
+                            await setDoc(sharedDocRef, appState);
+                        }
+
+                        if (!hasInitializedSelection) {
+                            const confDates = Object.keys(appState.confirmedSessions).sort();
+                            if (confDates.length > 0) {
+                                selectedCalendarDate = confDates[0];
+                                selectedMenuDate = confDates[0];
+                            }
+                            hasInitializedSelection = true;
+                        }
+
+                        updateSyncStatus('online', '5人リアルタイム同期中');
+                        renderApp();
+                    }, (error) => {
+                        console.error('Firestore error:', error);
+                        updateSyncStatus('error', '同期エラー');
+                        renderApp();
+                    });
+                });
+            } catch (err) {
+                console.error('Firebase init error:', err);
+                updateSyncStatus('offline', 'オフラインモード');
+                renderApp();
+            }
+        }
+
+        async function saveCloudData() {
+            updateHeaderAndBadges();
+            if (!db || !sharedDocRef || !currentUser) return;
+            try {
+                updateSyncStatus('syncing', '保存中...');
+                await setDoc(sharedDocRef, appState);
+                updateSyncStatus('online', '5人リアルタイム同期中');
+            } catch (err) {
+                console.error('Save error:', err);
+                updateSyncStatus('error', '保存失敗');
+            }
+        }
+
+        function updateSyncStatus(state, text) {
+            const dot = document.getElementById('sync-dot');
+            const label = document.getElementById('sync-status-text');
+            if (!dot || !label) return;
+            label.textContent = text;
+            dot.className = 'w-2 h-2 rounded-full ';
+            if (state === 'online') {
+                dot.className += 'bg-emerald-400 shadow-[0_0_8px_#10B981]';
+                label.className = 'text-[10px] text-emerald-400 font-bold';
+            } else if (state === 'syncing') {
+                dot.className += 'bg-amber-400 animate-ping';
+                label.className = 'text-[10px] text-amber-400 font-bold';
+            } else {
+                dot.className += 'bg-rose-500';
+                label.className = 'text-[10px] text-rose-400 font-bold';
+            }
+        }
+
+        function updateHeaderAndBadges() {
+            const titleEl = document.getElementById('header-band-name');
+            if (titleEl) titleEl.textContent = appState.bandName || 'BAND SYNC';
+            const confCount = Object.keys(appState.confirmedSessions).length;
+            const badge = document.getElementById('nav-badge-menu');
+            if (badge) badge.classList.toggle('hidden', confCount === 0);
+            const webhookBadge = document.getElementById('webhook-active-badge');
+            if (webhookBadge) webhookBadge.classList.toggle('hidden', !appState.webhookUrl);
+        }
+
+        function openLineShareIntent(text) {
+            window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+        }
+
+        async function triggerAutoLineWebhook(text) {
+            const url = (appState.webhookUrl || '').trim();
+            if (!url) return;
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, bandName: appState.bandName, timestamp: new Date().toISOString() })
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        function buildSessionLineMessage(s) {
+            const names = s.participants.map(pid => FIXED_MEMBERS.find(m => m.id === pid)?.name).filter(Boolean).join('、');
+            const menus = (s.menus || []).length > 0 ? '\n【メニュー】\n' + s.menus.map(m => `・${m.time} ${m.task}`).join('\n') : '';
+            return `🎸【スタジオ日程確定】\n日時：${formatDateWithDow(s.date)} ${s.timeSlot}\n場所：${s.studio}\n参加：${names} (${s.participants.length}人)${menus}`;
+        }
+
+        function showToast(message, type = 'success', lineMsg = null) {
+            const container = document.getElementById('toast-container');
+            container.innerHTML = '';
+            const toast = document.createElement('div');
+            toast.className = 'toast-enter pointer-events-auto w-full bg-[#181C24] border border-band-border text-white px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center justify-between gap-2.5';
+            
+            let btnHtml = '';
+            if (lineMsg) {
+                const id = 'line_btn_' + Date.now();
+                btnHtml = `<button id="${id}" class="px-3 py-1.5 rounded-xl bg-band-line text-white text-[11px] font-black flex items-center gap-1"><i class="fa-brands fa-line"></i>LINE</button>`;
+                setTimeout(() => { const b = document.getElementById(id); if(b) b.onclick = () => openLineShareIntent(lineMsg); }, 0);
+            }
+
+            toast.innerHTML = `<div class="flex items-center gap-2 truncate"><i class="fa-solid fa-circle-check text-emerald-400"></i><span class="truncate">${escapeHtml(message)}</span></div>${btnHtml}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 250); }, lineMsg ? 5000 : 2500);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-amber-400');
+                btn.classList.add('text-gray-400');
+            });
+            const active = document.getElementById(`nav-${tab}`);
+            if (active) { active.classList.remove('text-gray-400'); active.classList.add('text-amber-400'); }
+            renderApp();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderApp() {
+            const container = document.getElementById('app-content');
+            updateHeaderAndBadges();
+            if (currentTab === 'home') container.innerHTML = renderHomeTab();
+            else if (currentTab === 'schedule') container.innerHTML = renderScheduleTab();
+            else if (currentTab === 'menu') container.innerHTML = renderMenuTab();
+        }
+
+        function renderHomeTab() {
+            const confirmedList = Object.values(appState.confirmedSessions).sort((a, b) => a.date.localeCompare(b.date));
+            let confirmedHtml = confirmedList.length > 0 ? confirmedList.map((s, idx) => {
+                const dow = getDayOfWeekJP(s.date);
+                const isNext = idx === 0;
+                const members = FIXED_MEMBERS.map(m => s.participants.includes(m.id) ? `<span class="px-2 py-0.5 rounded text-[11px] font-bold border ${m.color}">${m.name}</span>` : `<span class="px-2 py-0.5 rounded text-[11px] bg-black/30 text-gray-600 line-through">${m.name}</span>`).join('');
+                const menus = (s.menus || []).slice(0, 3).map(m => `<div class="text-xs ${m.done?'text-gray-500 line-through':'text-gray-200'}">・${escapeHtml(m.time)} ${escapeHtml(m.task)}</div>`).join('');
+
+                return `
+                    <div class="bg-gradient-to-br from-[#1C212B] to-[#151820] border ${isNext?'border-emerald-500/50 shadow-lg shadow-emerald-500/10':'border-band-border'} rounded-2xl p-4 space-y-3 relative overflow-hidden">
+                        ${isNext ? '<div class="absolute top-0 right-0 bg-emerald-500 text-black text-[9px] font-black px-2.5 py-0.5 rounded-bl-xl">NEXT STUDIO</div>' : ''}
+                        <div>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-xl font-black text-white">${formatDateShort(s.date)}</span>
+                                <span class="text-xs font-bold text-gray-400">(${dow})</span>
+                                <span class="text-sm font-extrabold text-emerald-300">${escapeHtml(s.timeSlot)}</span>
+                            </div>
+                            <div class="mt-2 flex items-center justify-between flex-wrap gap-2">
+                                <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-black">
+                                    <i class="fa-solid fa-location-dot"></i> ${escapeHtml(s.studio)}
+                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <button onclick="openLineShareIntent(buildSessionLineMessage(appState.confirmedSessions['${s.date}']))" class="px-2.5 py-1 rounded-lg bg-band-line text-white text-[11px] font-black"><i class="fa-brands fa-line"></i> LINE共有</button>
+                                    <button onclick="jumpToCalendarDate('${s.date}')" class="px-2 py-1 bg-white/5 text-gray-300 text-[11px] font-bold rounded-lg">編集</button>
+                                    <button onclick="cancelConfirmedSession('${s.date}')" class="text-gray-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">${members}</div>
+                        <div onclick="selectedMenuDate='${s.date}';switchTab('menu')" class="bg-black/40 rounded-xl p-3 cursor-pointer border border-white/5">
+                            <div class="text-[10px] font-bold text-emerald-400 mb-1">練習メニュー (${s.menus?.length || 0}件)</div>
+                            ${menus || '<span class="text-[11px] text-gray-500">メニュー未登録（タップして追加）</span>'}
+                        </div>
+                    </div>
+                `;
+            }).join('') : `<div class="bg-band-card border border-dashed border-band-border rounded-2xl p-6 text-center text-xs text-gray-400">確定済みのスタジオ予定はありません。「日程集め」から追加してください。</div>`;
+
+            const tracksHtml = appState.tracks.map(t => `
+                <div class="bg-band-card border border-band-border rounded-2xl p-4 flex justify-between items-start gap-2">
+                    <div>
+                        <h3 class="font-bold text-base text-white">${escapeHtml(t.title)}</h3>
+                        <div class="flex gap-2 mt-1.5 text-[11px]">
+                            <button onclick="cycleTrackStatus('${t.id}')" class="px-2.5 py-0.5 rounded-full border bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold">${escapeHtml(t.status)}</button>
+                            <span class="bg-black/40 px-2 py-0.5 rounded text-gray-300">BPM <strong class="text-amber-400">${t.bpm||'-'}</strong></span>
+                            <span class="bg-black/40 px-2 py-0.5 rounded text-gray-300">Key <strong class="text-emerald-400">${t.key||'-'}</strong></span>
+                        </div>
+                        ${t.memo ? `<div class="mt-2 text-xs text-gray-300 bg-black/30 p-2 rounded-xl border-l-2 border-amber-500">${escapeHtml(t.memo)}</div>`:''}
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="openTrackModal('${t.id}')" class="p-2 text-gray-400 hover:text-amber-400"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button onclick="deleteTrack('${t.id}')" class="p-2 text-gray-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="tab-content space-y-6">
+                    <section class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-sm font-black text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-emerald-400 rounded-full"></span>確定済みスタジオ予定</h2>
+                            <button onclick="switchTab('schedule')" class="px-2.5 py-1.5 bg-white/5 text-emerald-400 font-bold text-[11px] rounded-xl"><i class="fa-regular fa-calendar-plus"></i> 日程追加</button>
+                        </div>
+                        ${confirmedHtml}
+                    </section>
+                    <section class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-sm font-black text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-amber-500 rounded-full"></span>現在着手中の曲</h2>
+                            <button onclick="openTrackModal()" class="px-3 py-2 bg-amber-500 text-black font-black text-xs rounded-xl shadow"><i class="fa-solid fa-plus"></i> 曲を追加</button>
+                        </div>
+                        <div class="space-y-3">${tracksHtml}</div>
+                    </section>
+                </div>
+            `;
+        }
+
+        function renderScheduleTab() {
+            const months = getTwoMonthsList();
+            const curMonth = months[activeCalendarMonthIndex] || months[0];
+
+            const memberPills = FIXED_MEMBERS.map(m => `
+                <button onclick="selectActiveMember('${m.id}')" class="px-3 py-2 rounded-xl text-xs font-black border transition ${m.id === activeMemberId ? 'bg-amber-500 text-black border-amber-400 shadow' : 'bg-band-card text-gray-300 border-band-border'}">
+                    ${m.name}
+                </button>
+            `).join('');
+
+            const monthTabs = months.map((m, idx) => `
+                <button onclick="activeCalendarMonthIndex=${idx};renderApp()" class="flex-1 py-2 text-xs font-black rounded-lg ${idx === activeCalendarMonthIndex ? 'bg-emerald-500 text-black' : 'text-gray-400'}">${m.label}</button>
+            `).join('');
+
+            // カレンダーセル生成
+            const firstDay = new Date(curMonth.year, curMonth.month - 1, 1).getDay();
+            const daysInMonth = new Date(curMonth.year, curMonth.month, 0).getDate();
+            const todayKey = toDateKey(new Date());
+
+            let cells = '';
+            for (let i = 0; i < firstDay; i++) cells += `<div class="h-14 rounded-xl bg-black/20"></div>`;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dk = `${curMonth.year}-${String(curMonth.month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isSelected = dk === selectedCalendarDate;
+                const isToday = dk === todayKey;
+                const confirmed = appState.confirmedSessions[dk];
+                const dayAvail = appState.availability[dk] || {};
+
+                let ok = 0, maybe = 0;
+                FIXED_MEMBERS.forEach(m => {
+                    if (dayAvail[m.id]?.status === 'ok') ok++;
+                    else if (dayAvail[m.id]?.status === 'maybe') maybe++;
+                });
+
+                let style = 'bg-black/35 border-white/5';
+                if (confirmed) style = 'bg-cyan-950/60 border-cyan-400';
+                else if (ok === 5) style = 'bg-emerald-950/60 border-emerald-500';
+                if (isSelected) style += ' ring-2 ring-amber-400 border-amber-400';
+
+                const mySt = dayAvail[activeMemberId]?.status;
+                const myDot = mySt === 'ok' ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>' : mySt === 'maybe' ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>' : mySt === 'ng' ? '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>' : '';
+
+                cells += `
+                    <button onclick="selectedCalendarDate='${dk}';renderApp()" class="h-14 rounded-xl border p-1 flex flex-col justify-between items-center transition ${style}">
+                        <div class="w-full flex justify-between px-0.5"><span class="text-xs font-black ${isToday?'text-amber-400 underline':'text-gray-200'}">${d}</span>${myDot}</div>
+                        ${confirmed ? `<span class="w-full text-center text-[9px] font-black bg-cyan-400 text-black rounded truncate">${escapeHtml(confirmed.studio)}</span>` : (ok>0||maybe>0)?`<div class="text-[9px] font-extrabold">${ok>0?`<span>◯${ok}</span>`:''}${maybe>0?`<span class="text-amber-400">△${maybe}</span>`:''}</div>`:'<span class="h-2"></span>'}
+                    </button>
+                `;
+            }
+
+            // 選択日の詳細パネル
+            const dk = selectedCalendarDate;
+            const dow = getDayOfWeekJP(dk);
+            const activeMember = FIXED_MEMBERS.find(m => m.id === activeMemberId);
+            const dayAvail = appState.availability[dk] || {};
+            const myAvail = dayAvail[activeMemberId] || { status: '', timeSlot: '19:00〜22:00' };
+            const confirmed = appState.confirmedSessions[dk];
+
+            const allResp = FIXED_MEMBERS.map(m => {
+                const r = dayAvail[m.id];
+                const badge = r?.status === 'ok' ? `<span class="text-emerald-300 text-[10px] font-black">◯ ${escapeHtml(r.timeSlot||'OK')}</span>` : r?.status === 'maybe' ? `<span class="text-amber-300 text-[10px] font-black">△ ${escapeHtml(r.timeSlot||'調整可')}</span>` : r?.status === 'ng' ? `<span class="text-rose-400 text-[10px] font-black">× 不可</span>` : `<span class="text-gray-600 text-[10px]">未入力</span>`;
+                return `<div class="flex justify-between py-1 border-b border-white/5 text-xs"><span>${m.name}</span>${badge}</div>`;
+            }).join('');
+
+            return `
+                <div class="tab-content space-y-4">
+                    <div class="bg-band-card border border-band-border rounded-2xl p-3">
+                        <div class="text-[11px] font-bold text-gray-300 mb-2">あなたの名前を選択：</div>
+                        <div class="flex gap-1.5 overflow-x-auto pb-1">${memberPills}</div>
+                    </div>
+                    <div class="bg-band-card border border-band-border rounded-2xl p-3.5 space-y-3">
+                        <div class="flex gap-1 bg-black/40 p-1 rounded-xl">${monthTabs}</div>
+                        <div class="grid grid-cols-7 text-center text-[10px] font-black pb-1 border-b border-white/5">
+                            <div class="text-rose-400">日</div><div class="text-gray-400">月</div><div class="text-gray-400">火</div><div class="text-gray-400">水</div><div class="text-gray-400">木</div><div class="text-gray-400">金</div><div class="text-cyan-400">土</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1">${cells}</div>
+                    </div>
+                    
+                    <div class="bg-band-card border border-band-border rounded-2xl p-4 space-y-4">
+                        <div class="flex justify-between items-center border-b border-band-border pb-2">
+                            <span class="text-lg font-black text-white">${formatDateShort(dk)}(${dow})</span>
+                            ${confirmed?`<span class="px-2 py-0.5 rounded-full bg-cyan-400 text-black text-[10px] font-black">確定：${confirmed.studio}</span>`:''}
+                        </div>
+                        <div class="bg-black/30 rounded-xl p-3 border border-amber-500/20 space-y-2">
+                            <div class="text-xs font-black text-amber-400">「${activeMember.name}」の都合を入力</div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setMyAvailability('${dk}','ok')" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='ok'?'bg-emerald-500 text-black border-emerald-400':'bg-band-card text-gray-400'}">◯ 参加OK</button>
+                                <button onclick="setMyAvailability('${dk}','maybe')" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='maybe'?'bg-amber-500 text-black border-amber-400':'bg-band-card text-gray-400'}">△ 微妙</button>
+                                <button onclick="setMyAvailability('${dk}','ng')" class="py-2 rounded-xl text-xs font-black border ${myAvail.status==='ng'?'bg-rose-500 text-white border-rose-400':'bg-band-card text-gray-400'}">× 不可</button>
+                            </div>
+                            <div class="flex gap-1.5 pt-1">
+                                <input type="text" id="my-timeslot" value="${escapeHtml(myAvail.timeSlot||'19:00〜22:00')}" class="flex-1 bg-band-bg border border-band-border rounded-xl px-3 py-2 text-xs text-white">
+                                <button onclick="saveMyTime('${dk}')" class="px-3 bg-amber-500 text-black font-black text-xs rounded-xl">保存</button>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-[11px] font-bold text-gray-400 mb-1">5人の回答状況</div>
+                            <div class="bg-black/25 rounded-xl px-3 py-1">${allResp}</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-[#162422] to-[#121820] rounded-xl p-3.5 border border-emerald-500/40 space-y-3">
+                            <div class="text-xs font-black text-emerald-400">この日でスタジオを確定する</div>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                ${FIXED_STUDIOS.st = FIXED_STUDIOS.map(st => `<label><input type="radio" name="conf-studio" value="${st}" ${(confirmed?.studio===st || (!confirmed && st===FIXED_STUDIOS[0]))?'checked':''} class="peer sr-only"><div class="p-2 rounded-xl border text-center text-xs font-black peer-checked:bg-emerald-500 peer-checked:text-black bg-black/40 text-gray-300">${st}</div></label>`).join('')}
+                            </div>
+                            <input type="text" id="conf-timeslot" value="${confirmed?.timeSlot||'19:00〜22:00'}" class="w-full bg-black/60 border border-band-border rounded-xl px-3 py-2 text-xs text-white font-bold">
+                            <button onclick="confirmStudio('${dk}')" class="w-full py-2.5 rounded-xl bg-emerald-500 text-black font-black text-xs shadow">確定してトップに反映</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMenuTab() {
+            const confirmedList = Object.values(appState.confirmedSessions).sort((a, b) => a.date.localeCompare(b.date));
+            if (confirmedList.length === 0) return `<div class="tab-content bg-band-card border border-dashed border-band-border rounded-2xl p-8 text-center text-xs text-gray-400 mt-4">確定済みのスタジオ予定がありません。</div>`;
+            if (!selectedMenuDate || !appState.confirmedSessions[selectedMenuDate]) selectedMenuDate = confirmedList[0].date;
+
+            const session = appState.confirmedSessions[selectedMenuDate];
+            const menus = session.menus || [];
+            const doneCount = menus.filter(m => m.done).length;
+            const progress = menus.length > 0 ? Math.round((doneCount / menus.length) * 100) : 0;
+
+            const sessionPills = confirmedList.map(s => `
+                <button onclick="selectedMenuDate='${s.date}';renderApp()" class="px-3 py-2 rounded-xl border text-left shrink-0 ${s.date===session.date?'bg-emerald-500/20 border-emerald-400 text-white':'bg-band-card border-band-border text-gray-400'}">
+                    <div class="text-xs font-black">${formatDateShort(s.date)}(${getDayOfWeekJP(s.date)})</div>
+                    <div class="text-[10px] text-amber-300 font-bold">${s.studio}</div>
+                </button>
+            `).join('');
+
+            const menuItems = menus.map((m, idx) => `
+                <div class="bg-band-card border ${m.done?'border-band-border/40 opacity-60':'border-band-border'} rounded-2xl p-3.5 flex items-start gap-3">
+                    <button onclick="toggleMenu('${session.date}','${m.id}')" class="mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 ${m.done?'bg-emerald-500 border-emerald-500 text-black':'border-gray-500 text-transparent'}"><i class="fa-solid fa-check text-xs"></i></button>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-black/50 text-emerald-300">${escapeHtml(m.time)}</span>
+                        <h4 class="text-sm font-bold ${m.done?'line-through text-gray-400':'text-white'} mt-1">${escapeHtml(m.task)}</h4>
+                        ${m.note?`<p class="text-xs text-gray-400 mt-0.5">${escapeHtml(m.note)}</p>`:''}
+                    </div>
+                    <button onclick="deleteMenu('${session.date}','${m.id}')" class="text-gray-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+            `).join('');
+
+            return `
+                <div class="tab-content space-y-4">
+                    <div class="flex gap-2 overflow-x-auto pb-1">${sessionPills}</div>
+                    <div class="bg-band-card border border-band-border rounded-2xl p-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-base font-black text-white">${formatDateShort(session.date)} @${session.studio}</div>
+                                <div class="text-xs font-bold text-emerald-300">${session.timeSlot}</div>
+                            </div>
+                            <button onclick="openMenuModal('${session.date}')" class="px-3 py-2 bg-emerald-500 text-black font-black text-xs rounded-xl shadow"><i class="fa-solid fa-plus"></i> 追加</button>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] mb-1 text-gray-400"><span>消化率</span><span class="text-emerald-400 font-bold">${doneCount}/${menus.length} (${progress}%)</span></div>
+                            <div class="w-full h-2 bg-black/50 rounded-full overflow-hidden"><div class="h-full bg-emerald-400 transition-all" style="width:${progress}%"></div></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2.5">${menuItems || '<div class="text-center text-xs text-gray-400 py-6">メニューがありません</div>'}</div>
+                </div>
+            `;
+        }
+
+        // アクション関数群
+        async function cycleTrackStatus(id) {
+            const list = ['アレンジ中', '合わせ練習中', '仕上げ', 'ライブ定番'];
+            const t = appState.tracks.find(x => x.id === id);
+            if (!t) return;
+            t.status = list[(list.indexOf(t.status) + 1) % list.length];
+            renderApp();
+            await saveCloudData();
+        }
+
+        async function deleteTrack(id) {
+            appState.tracks = appState.tracks.filter(x => x.id !== id);
+            renderApp();
+            await saveCloudData();
+        }
+
+        async function setMyAvailability(dk, status) {
+            if (!appState.availability[dk]) appState.availability[dk] = {};
+            const ts = document.getElementById('my-timeslot')?.value || '19:00〜22:00';
+            appState.availability[dk][activeMemberId] = { status, timeSlot: status==='ng'?'':ts };
+            renderApp();
+            await saveCloudData();
+            showToast('予定を保存しました');
+        }
+
+        async function saveMyTime(dk) {
+            setMyAvailability(dk, appState.availability[dk]?.[activeMemberId]?.status || 'ok');
+        }
+
+        async function confirmStudio(dk) {
+            const studio = document.querySelector('input[name="conf-studio"]:checked')?.value || FIXED_STUDIOS[0];
+            const timeSlot = document.getElementById('conf-timeslot').value || '19:00〜22:00';
+            const participants = FIXED_MEMBERS.map(m => m.id);
+            const existing = appState.confirmedSessions[dk];
+
+            appState.confirmedSessions[dk] = {
+                id: existing ? existing.id : 'conf_' + dk,
+                date: dk,
+                studio,
+                timeSlot,
+                participants,
+                menus: existing ? existing.menus : []
+            };
+            renderApp();
+            await saveCloudData();
+            showToast('スタジオを確定しました！', 'success', buildSessionLineMessage(appState.confirmedSessions[dk]));
+        }
+
+        async function cancelConfirmedSession(dk) {
+            delete appState.confirmedSessions[dk];
+            renderApp();
+            await saveCloudData();
+            showToast('確定を解除しました');
+        }
+
+        async function toggleMenu(dk, mid) {
+            const s = appState.confirmedSessions[dk];
+            const m = s?.menus.find(x => x.id === mid);
+            if (m) { m.done = !m.done; renderApp(); await saveCloudData(); }
+        }
+
+        async function deleteMenu(dk, mid) {
+            const s = appState.confirmedSessions[dk];
+            if (s) { s.menus = s.menus.filter(x => x.id !== mid); renderApp(); await saveCloudData(); }
+        }
+
+        function jumpToCalendarDate(dk) { selectedCalendarDate = dk; switchTab('schedule'); }
+        function selectActiveMember(id) { activeMemberId = id; savePreferredMember(id); renderApp(); }
+
+        // モーダル関連
+        function openModal(html) {
+            document.getElementById('modal-box').innerHTML = html;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+        }
+        function closeModal() { document.getElementById('modal-backdrop').classList.add('hidden'); }
+
+        function openTrackModal(id = null) {
+            const t = id ? appState.tracks.find(x => x.id === id) : null;
+            openModal(`
+                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">${t?'編集':'追加'}</h3><button onclick="closeModal()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                <form onsubmit="saveTrack(event,'${id||''}')" class="space-y-3">
+                    <input type="text" id="t-title" required value="${t?escapeHtml(t.title):''}" placeholder="曲名" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="t-bpm" value="${t?t.bpm:''}" placeholder="BPM" class="bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
+                        <input type="text" id="t-key" value="${t?escapeHtml(t.key):''}" placeholder="Key" class="bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
+                    </div>
+                    <textarea id="t-memo" placeholder="メモ" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">${t?escapeHtml(t.memo):''}</textarea>
+                    <button type="submit" class="w-full py-2.5 bg-amber-500 text-black font-black text-xs rounded-xl">保存</button>
+                </form>
+            `);
+        }
+
+        async function saveTrack(e, id) {
+            e.preventDefault();
+            const title = document.getElementById('t-title').value;
+            const bpm = document.getElementById('t-bpm').value;
+            const key = document.getElementById('t-key').value;
+            const memo = document.getElementById('t-memo').value;
+            if (id) {
+                const t = appState.tracks.find(x => x.id === id);
+                if (t) { t.title = title; t.bpm = bpm; t.key = key; t.memo = memo; }
+            } else {
+                appState.tracks.unshift({ id: 't_'+Date.now(), title, bpm, key, status: '合わせ練習中', memo });
+            }
+            closeModal(); renderApp(); await saveCloudData();
+        }
+
+        function openMenuModal(dk) {
+            openModal(`
+                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">メニュー追加</h3><button onclick="closeModal()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                <form onsubmit="saveMenu(event,'${dk}')" class="space-y-3">
+                    <input type="text" id="m-time" value="19:00〜19:30" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
+                    <input type="text" id="m-task" required placeholder="練習内容" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white">
+                    <textarea id="m-note" placeholder="メモ" class="w-full bg-black/50 border border-band-border rounded-xl px-3 py-2 text-sm text-white"></textarea>
+                    <button type="submit" class="w-full py-2.5 bg-emerald-500 text-black font-black text-xs rounded-xl">保存</button>
+                </form>
+            `);
+        }
+
+        async function saveMenu(e, dk) {
+            e.preventDefault();
+            const s = appState.confirmedSessions[dk];
+            if (!s) return;
+            s.menus.push({ id: 'm_'+Date.now(), time: document.getElementById('m-time').value, task: document.getElementById('m-task').value, note: document.getElementById('m-note').value, done: false });
+            closeModal(); renderApp(); await saveCloudData();
+        }
+
+        function openSettingsModal() {
+            openModal(`
+                <div class="flex justify-between mb-4"><h3 class="text-base font-black text-white">アプリ化・設定</h3><button onclick="closeModal()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                <div class="space-y-3 text-xs text-gray-300">
+                    <div class="bg-black/40 p-3 rounded-xl"><strong class="text-white">📱 スマホのホーム画面に追加する方法</strong><br>・iPhone: Safariの共有ボタン ＞「ホーム画面に追加」<br>・Android: Chromeのメニュー ＞「ホーム画面に追加」</div>
+                    <form onsubmit="saveBandName(event)" class="space-y-2"><label class="font-bold">バンド名</label><div class="flex gap-2"><input type="text" id="s-name" value="${escapeHtml(appState.bandName)}" class="flex-1 bg-black/50 border border-band-border rounded-xl px-3 py-2 text-white"><button type="submit" class="px-4 bg-amber-500 text-black font-bold rounded-xl">変更</button></div></form>
+                </div>
+            `);
+        }
+
+        async function saveBandName(e) {
+            e.preventDefault();
+            appState.bandName = document.getElementById('s-name').value;
+            renderApp(); closeModal(); await saveCloudData();
+        }
+
+        // グローバル公開
+        window.switchTab = switchTab;
+        window.openSettingsModal = openSettingsModal;
+        window.closeModal = closeModal;
+        window.cycleTrackStatus = cycleTrackStatus;
+        window.deleteTrack = deleteTrack;
+        window.openTrackModal = openTrackModal;
+        window.saveTrack = saveTrack;
+        window.jumpToCalendarDate = jumpToCalendarDate;
+        window.selectActiveMember = selectActiveMember;
+        window.setMyAvailability = setMyAvailability;
+        window.saveMyTime = saveMyTime;
+        window.confirmStudio = confirmStudio;
+        window.cancelConfirmedSession = cancelConfirmedSession;
+        window.toggleMenu = toggleMenu;
+        window.deleteMenu = deleteMenu;
+        window.openMenuModal = openMenuModal;
+        window.saveMenu = saveMenu;
+        window.saveBandName = saveBandName;
+        window.openLineShareIntent = openLineShareIntent;
+        window.buildSessionLineMessage = buildSessionLineMessage;
+
+        initFirebaseSync();
+    </script>
+</body>
+</html>
