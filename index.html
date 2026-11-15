@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title> end A like affair- 5人専用スタジオ日程＆練習管理</title>
+    <title>end A like affair - 5人専用スタジオ日程＆練習管理</title>
     
     <!-- PWA / スマホホーム画面アイコン化対応 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -94,7 +94,7 @@
                     <i class="fa-solid fa-bolt"></i>
                 </div>
                 <div class="min-w-0">
-                    <h1 class="font-black text-base tracking-wider text-white leading-none truncate" id="header-band-name">BAND SYNC</h1>
+                    <h1 class="font-black text-base tracking-wider text-white leading-none truncate" id="header-band-name">end A like affair</h1>
                     <div class="flex items-center gap-1.5 mt-1">
                         <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                         <span id="sync-status-text" class="text-[10px] text-gray-400 font-bold">クラウド接続中...</span>
@@ -159,9 +159,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================
-        // 1. あなたが取得したFirebase設定
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyBQnYTdqa59PH_PW1ASCu2zm0SpUp2zcFU",
             authDomain: "end-a-like-affair-kanri.firebaseapp.com",
@@ -220,10 +217,9 @@
             const y = now.getFullYear();
             const m = now.getMonth();
             const d1 = toDateKey(new Date(y, m, Math.min(28, now.getDate() + 3)));
-            const d2 = toDateKey(new Date(y, m, Math.min(28, now.getDate() + 7)));
 
             return {
-                bandName: 'BAND SYNC',
+                bandName: 'end A like affair',
                 webhookUrl: '',
                 tracks: [
                     { id: 't1', title: '北風とオーバーレブ', bpm: 172, key: 'Em', status: '合わせ練習中', memo: 'サビ前のキメを5人でバッチリ合わせる。' },
@@ -290,14 +286,13 @@
                 onAuthStateChanged(auth, (user) => {
                     if (!user) return;
                     currentUser = user;
-                    // バンド専用の共有ドキュメントパス
                     sharedDocRef = doc(db, 'artifacts', 'band-sync-5members', 'public', 'data', 'band_workspace', 'main_state');
 
                     onSnapshot(sharedDocRef, async (snapshot) => {
                         if (snapshot.exists()) {
                             const data = snapshot.data();
                             appState = {
-                                bandName: data.bandName || 'BAND SYNC',
+                                bandName: data.bandName || 'end A like affair',
                                 webhookUrl: data.webhookUrl || '',
                                 tracks: Array.isArray(data.tracks) ? data.tracks : [],
                                 availability: data.availability || {},
@@ -365,7 +360,7 @@
 
         function updateHeaderAndBadges() {
             const titleEl = document.getElementById('header-band-name');
-            if (titleEl) titleEl.textContent = appState.bandName || 'BAND SYNC';
+            if (titleEl) titleEl.textContent = appState.bandName || 'end A like affair';
             const confCount = Object.keys(appState.confirmedSessions).length;
             const badge = document.getElementById('nav-badge-menu');
             if (badge) badge.classList.toggle('hidden', confCount === 0);
@@ -528,7 +523,6 @@
                 <button onclick="activeCalendarMonthIndex=${idx};renderApp()" class="flex-1 py-2 text-xs font-black rounded-lg ${idx === activeCalendarMonthIndex ? 'bg-emerald-500 text-black' : 'text-gray-400'}">${m.label}</button>
             `).join('');
 
-            // カレンダーセル生成
             const firstDay = new Date(curMonth.year, curMonth.month - 1, 1).getDay();
             const daysInMonth = new Date(curMonth.year, curMonth.month, 0).getDate();
             const todayKey = toDateKey(new Date());
@@ -565,7 +559,6 @@
                 `;
             }
 
-            // 選択日の詳細パネル
             const dk = selectedCalendarDate;
             const dow = getDayOfWeekJP(dk);
             const activeMember = FIXED_MEMBERS.find(m => m.id === activeMemberId);
@@ -578,6 +571,13 @@
                 const badge = r?.status === 'ok' ? `<span class="text-emerald-300 text-[10px] font-black">◯ ${escapeHtml(r.timeSlot||'OK')}</span>` : r?.status === 'maybe' ? `<span class="text-amber-300 text-[10px] font-black">△ ${escapeHtml(r.timeSlot||'調整可')}</span>` : r?.status === 'ng' ? `<span class="text-rose-400 text-[10px] font-black">× 不可</span>` : `<span class="text-gray-600 text-[10px]">未入力</span>`;
                 return `<div class="flex justify-between py-1 border-b border-white/5 text-xs"><span>${m.name}</span>${badge}</div>`;
             }).join('');
+
+            const studioRadios = FIXED_STUDIOS.map(st => `
+                <label class="cursor-pointer">
+                    <input type="radio" name="conf-studio" value="${st}" ${(confirmed?.studio===st || (!confirmed && st===FIXED_STUDIOS[0]))?'checked':''} class="peer sr-only">
+                    <div class="p-2 rounded-xl border text-center text-xs font-black peer-checked:bg-emerald-500 peer-checked:text-black bg-black/40 text-gray-300">${st}</div>
+                </label>
+            `).join('');
 
             return `
                 <div class="tab-content space-y-4">
@@ -617,7 +617,7 @@
                         <div class="bg-gradient-to-br from-[#162422] to-[#121820] rounded-xl p-3.5 border border-emerald-500/40 space-y-3">
                             <div class="text-xs font-black text-emerald-400">この日でスタジオを確定する</div>
                             <div class="grid grid-cols-3 gap-1.5">
-                                ${FIXED_STUDIOS.st = FIXED_STUDIOS.map(st => `<label><input type="radio" name="conf-studio" value="${st}" ${(confirmed?.studio===st || (!confirmed && st===FIXED_STUDIOS[0]))?'checked':''} class="peer sr-only"><div class="p-2 rounded-xl border text-center text-xs font-black peer-checked:bg-emerald-500 peer-checked:text-black bg-black/40 text-gray-300">${st}</div></label>`).join('')}
+                                ${studioRadios}
                             </div>
                             <input type="text" id="conf-timeslot" value="${confirmed?.timeSlot||'19:00〜22:00'}" class="w-full bg-black/60 border border-band-border rounded-xl px-3 py-2 text-xs text-white font-bold">
                             <button onclick="confirmStudio('${dk}')" class="w-full py-2.5 rounded-xl bg-emerald-500 text-black font-black text-xs shadow">確定してトップに反映</button>
@@ -677,7 +677,6 @@
             `;
         }
 
-        // アクション関数群
         async function cycleTrackStatus(id) {
             const list = ['アレンジ中', '合わせ練習中', '仕上げ', 'ライブ定番'];
             const t = appState.tracks.find(x => x.id === id);
@@ -746,7 +745,6 @@
         function jumpToCalendarDate(dk) { selectedCalendarDate = dk; switchTab('schedule'); }
         function selectActiveMember(id) { activeMemberId = id; savePreferredMember(id); renderApp(); }
 
-        // モーダル関連
         function openModal(html) {
             document.getElementById('modal-box').innerHTML = html;
             document.getElementById('modal-backdrop').classList.remove('hidden');
@@ -820,7 +818,6 @@
             renderApp(); closeModal(); await saveCloudData();
         }
 
-        // グローバル公開
         window.switchTab = switchTab;
         window.openSettingsModal = openSettingsModal;
         window.closeModal = closeModal;
